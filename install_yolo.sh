@@ -82,19 +82,16 @@ log "Detected L4T/JetPack package version: ${L4T_VER:-unknown}"
 log "Detected CUDA version: ${CUDA_VER:-unknown}"
 
 # ------------------ Load known wheel mappings ------------------------
-# KNOWN_FILE="./known_wheels.sh"
-if [[ -f "$KNOWN_FILE" ]]; then
-
 declare -a WHEELS_KNOWN=()
 
 if [[ -f "$KNOWN_FILE" ]]; then
   log "Loading wheel mappings from $KNOWN_FILE"
   # shellcheck disable=SC1090
   source "$KNOWN_FILE"
-  # Map CUDA x.y -> KNOWN_WHEELS_x_y variable contents
+
+  # Map CUDA x.y -> KNOWN_WHEELS_x_y
   var_name="KNOWN_WHEELS_${CUDA_MM//./_}"
   if [[ -n "${!var_name:-}" ]]; then
-    # Split the newline-separated string into array
     mapfile -t WHEELS_KNOWN < <(printf "%s\n" "${!var_name}" | sed '/^\s*$/d')
     log "Found ${#WHEELS_KNOWN[@]} predefined wheels for CUDA ${CUDA_MM}."
   else
