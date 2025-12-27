@@ -9,14 +9,23 @@
 set -Eeuo pipefail
 
 # --------------------------- CONFIG ----------------------------------
-PYTHON_VERSION="${PYTHON_VERSION:-3.10}"      # Match your wheel ABI (cp310 in examples)
-VENV_DIR="${VENV_DIR:-$HOME/yolo-venv}"
-WHEELS_DIR="${WHEELS_DIR:-./whls}"
-EXTRA_INDEX_URL="${EXTRA_INDEX_URL:-}"        
-REQ_FILE="${REQ_FILE:-}"                      # Optional requirements.txt
+PYTHON_VERSION="${PYTHON_VERSION:-3.10}"   # Match wheel ABI (cp310)
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+VENV_DIR="${VENV_DIR:-$SCRIPT_DIR/.venv}"
+WHEELS_DIR="${WHEELS_DIR:-$SCRIPT_DIR/whls}"
+KNOWN_FILE="${KNOWN_FILE:-$SCRIPT_DIR/known_wheels.sh}"
+
+EXTRA_INDEX_URL="${EXTRA_INDEX_URL:-}"
+REQ_FILE="${REQ_FILE:-}"
+
 NVCC="/usr/local/cuda/bin/nvcc"
-DIST_PACKAGES_PATH="/usr/lib/python3.10/dist-packages"
-TENSORRT_PTH_FILE="$VENV_DIR/lib/python3.10/site-packages/tensorrt.pth"
+
+PY_SITE_PACKAGES="lib/python${PYTHON_VERSION}/site-packages"
+DIST_PACKAGES_PATH="/usr/lib/python${PYTHON_VERSION}/dist-packages"
+TENSORRT_PTH_FILE="${VENV_DIR}/${PY_SITE_PACKAGES}/tensorrt.pth"
+
 
 INSTALL_PACKAGES=(
   "ultralytics[export]"
@@ -73,7 +82,9 @@ log "Detected L4T/JetPack package version: ${L4T_VER:-unknown}"
 log "Detected CUDA version: ${CUDA_VER:-unknown}"
 
 # ------------------ Load known wheel mappings ------------------------
-KNOWN_FILE="./known_wheels.sh"
+# KNOWN_FILE="./known_wheels.sh"
+if [[ -f "$KNOWN_FILE" ]]; then
+
 declare -a WHEELS_KNOWN=()
 
 if [[ -f "$KNOWN_FILE" ]]; then
